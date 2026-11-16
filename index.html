@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SiliconAIShock — Crise de Memória DRAM</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="lib/d3.v7.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1>SiliconAIShock <small>Crise de Memória DRAM (2024–2026)</small></h1>
+    <div id="legend" class="legend"></div>
+    <div class="layout-switch" title="Alternar entre as duas opções de layout">
+      <span>Layout:</span>
+      <button type="button" data-layout="bottom3" class="active">1 · Base 3 painéis</button>
+      <button type="button" data-layout="rightsplit">2 · Coluna direita dividida</button>
+    </div>
+    <div class="topbar-right">
+      <span id="count"></span>
+      <button id="btn-reset" type="button" disabled>Limpar filtros</button>
+    </div>
+  </header>
+
+  <main id="dashboard" class="dashboard">
+    <section class="panel panel-pcp">
+      <h2>A. Coordenadas Paralelas <small>arraste sobre um eixo para filtrar · clique em uma linha para fixar</small></h2>
+      <div id="view-pcp" class="view"></div>
+    </section>
+
+    <aside class="panel panel-details">
+      <h2>Detalhes do kit</h2>
+      <div id="details" class="details"></div>
+    </aside>
+
+    <section class="panel panel-scatter">
+      <h2>B. Estoque × Preço <small>arraste para selecionar · clique para fixar · raio = capacidade</small></h2>
+      <div id="view-scatter" class="view"></div>
+    </section>
+
+    <section class="panel panel-heatmap">
+      <h2>C. Impacto por Período <small>mediana US$/GB · clique para filtrar</small></h2>
+      <div id="view-heatmap" class="view"></div>
+    </section>
+
+    <section class="panel panel-dumbbell">
+      <h2>D. Salto 2024 → 2026 por Uso <small>clique para filtrar</small></h2>
+      <div id="view-dumbbell" class="view"></div>
+    </section>
+  </main>
+
+  <div id="tooltip" class="tooltip hidden"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

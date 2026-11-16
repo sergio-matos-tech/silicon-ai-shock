@@ -1,0 +1,188 @@
+:root {
+  --border: #dee2e6;
+  --text: #1f2937;
+  --muted: #5b6472;
+  --font: "Segoe UI", -apple-system, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;   /* header + dashboard fill exactly 100vh */
+  height: 100vh;
+  overflow: hidden;
+  background: #f1f5f9;
+  color: var(--text);
+  font: 12px/1.35 var(--font);
+}
+
+/* ---------- Header ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 6px 14px;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+}
+.topbar h1 { margin: 0; font-size: 16px; }
+.topbar h1 small { font-size: 12px; font-weight: 400; color: var(--muted); margin-left: 8px; }
+.legend { display: flex; gap: 12px; padding: 3px 10px; border: 1px solid var(--border); border-radius: 12px; font-size: 12px; color: #334155; }
+.legend span { display: inline-flex; align-items: center; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; }
+
+.layout-switch { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font-size: 11.5px; }
+.layout-switch button {
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: #f8fafc;
+  color: #475569;
+  font: inherit;
+  cursor: pointer;
+}
+.layout-switch button.active {
+  background: #eff6ff;
+  border-color: #2563eb;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; color: var(--muted); }
+.topbar-right button {
+  padding: 4px 10px;
+  border: 1px solid #94a3b8;
+  border-radius: 4px;
+  background: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+.topbar-right button:disabled { opacity: 0.45; cursor: default; }
+
+/* ---------- Single-screen 20-column grid (2 layout placements) ---------- */
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(20, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+  padding: 8px;
+  min-height: 0;
+}
+
+/* Placement 1 (default): Top 80/20 (PCP + Details), Bottom 35/35/30 (Scatter + Heatmap + Dumbbell) */
+.panel-pcp      { grid-column: 1 / 17; grid-row: 1; }
+.panel-details  { grid-column: 17 / 21; grid-row: 1; }
+.panel-scatter  { grid-column: 1 / 8;  grid-row: 2; }
+.panel-heatmap  { grid-column: 8 / 15; grid-row: 2; }
+.panel-dumbbell { grid-column: 15 / 21; grid-row: 2; }
+
+/* Placement 2 (.layout-rightsplit): Right 25% column split vertically (Dumbbell top + Details bottom) */
+.dashboard.layout-rightsplit .panel-pcp      { grid-column: 1 / 16; grid-row: 1; }
+.dashboard.layout-rightsplit .panel-dumbbell { grid-column: 16 / 21; grid-row: 1; }
+.dashboard.layout-rightsplit .panel-scatter  { grid-column: 1 / 8;  grid-row: 2; }
+.dashboard.layout-rightsplit .panel-heatmap  { grid-column: 8 / 16; grid-row: 2; }
+.dashboard.layout-rightsplit .panel-details  { grid-column: 16 / 21; grid-row: 2; }
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.panel h2 { margin: 0; padding: 7px 12px 4px; font-size: 15px; font-weight: 700; color: #0f172a; }
+.panel h2 small { font-size: 11px; font-weight: 400; color: var(--muted); margin-left: 8px; }
+
+/* The SVG is absolutely positioned so it never changes the size of its grid cell */
+.view { position: relative; flex: 1; min-height: 0; }
+.view svg { position: absolute; inset: 0; user-select: none; }
+
+/* ---------- Details card (HTML table) ---------- */
+.details { flex: 1; min-height: 0; overflow-y: auto; padding: 0 10px 8px; }
+.empty-msg { color: var(--muted); margin: 8px 0; }
+.card-title {
+  display: flex;
+  flex-direction: column;
+  padding-left: 8px;
+  margin-bottom: 4px;
+  border-left: 4px solid #94a3b8;
+}
+.card-title span { color: var(--muted); font-size: 11px; }
+.details-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.details-table td { padding: 2px 3px; border-bottom: 1px solid #f1f5f9; }
+.details-table td:first-child { color: var(--muted); }
+.details-table td:last-child { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* ---------- Axes & brush ---------- */
+.axis path, .axis line { stroke: #94a3b8; }
+.axis text { fill: #475569; font-size: 11px; paint-order: stroke; stroke: #fff; stroke-width: 3px; stroke-linejoin: round; }
+.axis-title { fill: #334155; font-size: 12px; font-weight: 500; }
+.brush .selection, .axis-brush .selection { fill: #2563eb; fill-opacity: 0.15; stroke: #1d4ed8; }
+
+/* ---------- A. Parallel coordinates ---------- */
+.pcp-line { fill: none; stroke-width: 1.5px; stroke-opacity: 0.45; }
+.pcp-line.out { stroke: #e2e8f0; stroke-opacity: 0.12; }
+.pcp-line.hover { stroke-width: 3px; stroke-opacity: 1; }
+.pcp-hit { fill: none; stroke: transparent; stroke-width: 8px; pointer-events: stroke; cursor: pointer; }
+.pcp-hit.out { pointer-events: none; }
+
+/* ---------- B. Scatter ---------- */
+.dot { fill-opacity: 0.7; stroke: #fff; stroke-width: 0.5px; cursor: pointer; }
+.dot.out { fill: #cbd5e1; fill-opacity: 0.25; stroke: none; pointer-events: none; }
+.dot.hover { stroke: #111827; stroke-width: 2px; fill-opacity: 1; }
+.critical-zone { fill: #fee2e2; fill-opacity: 0.55; pointer-events: none; }
+.critical-line, .critical-label { pointer-events: none; }
+.critical-line { stroke: #b91c1c; stroke-width: 1.5px; stroke-dasharray: 6 4; }
+.critical-label { fill: #b91c1c; font-size: 11px; font-weight: 600; }
+
+/* ---------- C. Heatmap ---------- */
+.heat-axis text { font-size: 11px; fill: var(--text); }
+.cell { cursor: pointer; }
+.cell rect { stroke: #fff; stroke-width: 1px; }
+.cell:hover rect { stroke: #111827; stroke-width: 2px; }
+.cell.active rect { stroke: #111827; stroke-width: 3px; }
+.cell.dimmed { opacity: 0.4; }
+.cell.empty { cursor: default; }
+.cell.empty rect { fill: #f1f5f9; }
+.cell.empty text { fill: #94a3b8; }
+.cell text { pointer-events: none; }
+.cell-value { font-size: 12px; font-weight: 700; }
+.legend-text { font-size: 11px; fill: #475569; }
+
+/* ---------- D. Dumbbell ---------- */
+.db-grid line { stroke: #e2e8f0; stroke-dasharray: 2 2; }
+.db-yaxis text { font-size: 11px; fill: var(--text); font-weight: 500; }
+.db-row { cursor: pointer; }
+.db-row-bg { fill: transparent; }
+.db-row:hover .db-row-bg { fill: #f1f5f9; }
+.db-row.active .db-row-bg { fill: #eff6ff; stroke: #2563eb; stroke-width: 1.5px; }
+.db-row.dimmed { opacity: 0.35; }
+.db-row.empty { opacity: 0.25; cursor: default; }
+.db-ghost-line { stroke: #e2e8f0; stroke-width: 4px; stroke-linecap: round; }
+.db-line { stroke: #64748b; stroke-width: 3px; stroke-linecap: round; }
+.db-dot-24 { fill: #3b82f6; stroke: #fff; stroke-width: 1.5px; }
+.db-dot-26 { fill: #dc2626; stroke: #fff; stroke-width: 1.5px; }
+.db-lbl-24 { fill: #475569; font-size: 10.5px; font-variant-numeric: tabular-nums; pointer-events: none; }
+.db-lbl-26 { fill: #b91c1c; font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; pointer-events: none; }
+
+/* ---------- Tooltip ---------- */
+.tooltip {
+  position: fixed;
+  z-index: 10;
+  pointer-events: none;
+  padding: 6px 9px;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid #94a3b8;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
+}
+.tip-title { font-weight: 700; margin-bottom: 2px; }
+.tip-row { display: flex; justify-content: space-between; gap: 14px; }
+.tip-row span:first-child { color: var(--muted); }
+.hidden { display: none; }
