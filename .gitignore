@@ -1,0 +1,16 @@
+# Python virtual environment & bytecode
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Course reference materials & duplicate root CSV
+References/
+requirements/
+/Ultimate_Memory_Shortage_Crisis_Dataset_10k.csv
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
