@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SiliconAIShock — Crise de Memória DRAM (2024–2026)</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css?v=2" />
   <script src="lib/d3.v7.min.js"></script>
 </head>
 <body>
@@ -16,15 +16,6 @@
 
     <div id="legend" class="legend" title="Clique em uma geração para filtrar"></div>
 
-    <nav id="story-stepper" class="story-stepper" aria-label="Atos da narrativa"></nav>
-
-    <div class="layout-switch" title="Alternar organização dos painéis">
-      <span>Layout:</span>
-      <button type="button" data-layout="storyfirst" class="active">1 · Narrativa</button>
-      <button type="button" data-layout="bottom3">2 · Explorador</button>
-      <button type="button" data-layout="rightsplit">3 · Coluna</button>
-    </div>
-
     <div class="topbar-right">
       <div id="active-filters" class="filter-chips"></div>
       <span id="count" class="kit-counter"></span>
@@ -32,11 +23,21 @@
     </div>
   </header>
 
-  <section id="story-banner" class="story-banner" aria-live="polite"></section>
+  <section id="story-banner" class="story-banner">
+    <div class="story-banner-body">
+      <div class="story-banner-title">Visão Geral (2024–2026): Da Estabilidade ao Choque Global de Silício</div>
+      <div class="story-banner-text">
+        A realocação de wafers para memória HBM de GPUs de IA (50 → 279 GB) drena o estoque global de 14,5 para 3,5 semanas e multiplica o preço mediano por GB em 5,6× (US$ 12,32 → US$ 68,47).
+      </div>
+    </div>
+    <div class="story-banner-controls">
+      <span class="story-banner-tag">300 kits · 12 trimestres</span>
+    </div>
+  </section>
 
   <section id="kpi-strip" class="kpi-strip" aria-label="Indicadores vitais do mercado"></section>
 
-  <main id="dashboard" class="dashboard layout-storyfirst">
+  <main id="dashboard" class="dashboard">
     <section class="panel panel-timeline">
       <h2>
         <span class="step-badge step-story">E</span>
@@ -111,6 +112,6 @@
 
   <div id="tooltip" class="tooltip hidden"></div>
 
-  <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/main.js?v=2"></script>
 </body>
 </html>

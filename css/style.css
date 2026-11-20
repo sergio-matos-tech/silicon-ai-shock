@@ -103,77 +103,6 @@ body {
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
 }
 
-/* Guided Story Stepper in Header */
-.story-stepper {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 2px;
-  background: rgba(15, 23, 42, 0.55);
-  border: 1px solid #334155;
-  border-radius: 7px;
-}
-.story-step {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 8px;
-  border: none;
-  border-radius: 5px;
-  background: transparent;
-  color: #cbd5e1;
-  font: 600 11px/1.2 var(--font);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-}
-.story-step:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
-}
-.story-step.active {
-  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
-  color: #ffffff;
-  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.45);
-}
-.story-step-num {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.16);
-  font-size: 10px;
-  font-weight: 800;
-}
-
-/* Layout switcher */
-.layout-switch {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  color: #94a3b8;
-  font-size: 11px;
-}
-.layout-switch button {
-  padding: 3px 7px;
-  border: 1px solid #334155;
-  border-radius: 5px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #cbd5e1;
-  font: 500 11px/1.2 var(--font);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.layout-switch button:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
-.layout-switch button.active {
-  background: #f8fafc;
-  border-color: #f8fafc;
-  color: #0f172a;
-  font-weight: 700;
-}
-
 .topbar-right {
   margin-left: auto;
   display: flex;
@@ -264,23 +193,6 @@ body {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-.story-nav-btn {
-  padding: 2px 8px;
-  border: 1px solid #cbd5e1;
-  border-radius: 5px;
-  background: #ffffff;
-  color: #334155;
-  font: 600 11px/1.2 var(--font);
-  cursor: pointer;
-}
-.story-nav-btn:hover:not(:disabled) { background: #f1f5f9; border-color: #94a3b8; }
-.story-nav-btn:disabled { opacity: 0.4; cursor: default; }
-.story-nav-primary {
-  background: #1d4ed8;
-  border-color: #1e40af;
-  color: #ffffff;
-}
-.story-nav-primary:hover:not(:disabled) { background: #1e40af; }
 
 /* ---------- K0. Vital Signs KPI Strip ---------- */
 .kpi-strip {
@@ -381,7 +293,7 @@ body {
   text-overflow: ellipsis;
 }
 
-/* ---------- Main 20-Column Dashboard Grid (3 Layouts) ---------- */
+/* ---------- Main 20-Column Dashboard Grid (Narrativa Layout) ---------- */
 .dashboard {
   display: grid;
   grid-template-columns: repeat(20, minmax(0, 1fr));
@@ -392,35 +304,17 @@ body {
   overflow-y: auto;
 }
 
-/* Placement: bottom3 (Explorador no topo) */
-.panel-pcp      { grid-column: 1 / 16; grid-row: 1; }
-.panel-details  { grid-column: 16 / 21; grid-row: 1; }
-.panel-scatter  { grid-column: 1 / 8;  grid-row: 2; }
-.panel-heatmap  { grid-column: 8 / 15; grid-row: 2; }
-.panel-dumbbell { grid-column: 15 / 21; grid-row: 2; }
-.panel-timeline { grid-column: 1 / 8;  grid-row: 3; }
-.panel-indexed  { grid-column: 8 / 15; grid-row: 3; }
-.panel-value    { grid-column: 15 / 21; grid-row: 3; }
-
-/* Placement: rightsplit (Coluna direita dividida) */
-.dashboard.layout-rightsplit .panel-pcp      { grid-column: 1 / 16; grid-row: 1; }
-.dashboard.layout-rightsplit .panel-dumbbell { grid-column: 16 / 21; grid-row: 1; }
-.dashboard.layout-rightsplit .panel-scatter  { grid-column: 1 / 8;  grid-row: 2; }
-.dashboard.layout-rightsplit .panel-heatmap  { grid-column: 8 / 16; grid-row: 2; }
-.dashboard.layout-rightsplit .panel-details  { grid-column: 16 / 21; grid-row: 2; }
-.dashboard.layout-rightsplit .panel-timeline { grid-column: 1 / 8;  grid-row: 3; }
-.dashboard.layout-rightsplit .panel-indexed  { grid-column: 8 / 16; grid-row: 3; }
-.dashboard.layout-rightsplit .panel-value    { grid-column: 16 / 21; grid-row: 3; }
-
-/* Placement: storyfirst (Default: Narrativa E, F, G no topo + Explorador A..D abaixo) */
-.dashboard.layout-storyfirst .panel-timeline { grid-column: 1 / 8;  grid-row: 1; }
-.dashboard.layout-storyfirst .panel-indexed  { grid-column: 8 / 15; grid-row: 1; }
-.dashboard.layout-storyfirst .panel-value    { grid-column: 15 / 21; grid-row: 1; }
-.dashboard.layout-storyfirst .panel-pcp      { grid-column: 1 / 16; grid-row: 2; }
-.dashboard.layout-storyfirst .panel-details  { grid-column: 16 / 21; grid-row: 2; }
-.dashboard.layout-storyfirst .panel-scatter  { grid-column: 1 / 8;  grid-row: 3; }
-.dashboard.layout-storyfirst .panel-heatmap  { grid-column: 8 / 15; grid-row: 3; }
-.dashboard.layout-storyfirst .panel-dumbbell { grid-column: 15 / 21; grid-row: 3; }
+/* Row 1: Narrative overview (E · Clock & Reservoir, F · Wafer Maps, G · Star Glyphs)
+   Row 2: Multidimensional Explorer (A · Parallel Coordinates + ★ Inspector & Receipt)
+   Row 3: Supply, Temporal & Workload Breakdown (B · Scatter, C · Heatmap, D · Dumbbell) */
+.panel-timeline { grid-column: 1 / 8;  grid-row: 1; }
+.panel-indexed  { grid-column: 8 / 15; grid-row: 1; }
+.panel-value    { grid-column: 15 / 21; grid-row: 1; }
+.panel-pcp      { grid-column: 1 / 16; grid-row: 2; }
+.panel-details  { grid-column: 16 / 21; grid-row: 2; }
+.panel-scatter  { grid-column: 1 / 8;  grid-row: 3; }
+.panel-heatmap  { grid-column: 8 / 15; grid-row: 3; }
+.panel-dumbbell { grid-column: 15 / 21; grid-row: 3; }
 
 /* ---------- Panel Card Surfaces ---------- */
 .panel {

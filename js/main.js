@@ -1,6 +1,5 @@
 import { state, GEN_COLORS, genShort, segShort, quarterLabel } from "./state.js";
 import { initKPIs } from "./kpi.js";
-import { initStory } from "./story.js";
 import { initClock } from "./clock.js";
 import { initWafer } from "./wafer.js";
 import { initGlyphs } from "./glyphs.js";
@@ -20,29 +19,11 @@ const legendItems = d3
   .html(([name, color]) => `<i style="background:${color}"></i>${genShort(name)}`)
   .on("click", (_, [name]) => state.toggleGen(name));
 
-// Layout switcher (1: Narrativa no topo, 2: Explorador no topo, 3: Coluna direita)
-const dash = d3.select("#dashboard");
-const setLayout = (mode) => {
-  dash
-    .classed("layout-rightsplit", mode === "rightsplit")
-    .classed("layout-storyfirst", mode === "storyfirst");
-  d3.selectAll(".layout-switch button").classed("active", function () {
-    return this.dataset.layout === mode;
-  });
-};
-d3.selectAll(".layout-switch button").on("click", function () {
-  setLayout(this.dataset.layout);
-});
-if (location.search.includes("bottom3")) setLayout("bottom3");
-if (location.search.includes("rightsplit")) setLayout("rightsplit");
-if (location.search.includes("storyfirst")) setLayout("storyfirst");
-
 Promise.all([d3.json("data/processed_data.json"), d3.json("data/aggregates.json")])
   .then(([data, agg]) => {
     state.init(data, agg);
 
     initKPIs(document.querySelector("#kpi-strip"));
-    initStory(document.querySelector("#story-stepper"), document.querySelector("#story-banner"));
     initClock(document.querySelector("#view-timeline"));
     initWafer(document.querySelector("#view-indexed"));
     initGlyphs(document.querySelector("#view-value"));
