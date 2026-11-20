@@ -38,7 +38,7 @@ export function initPCP(container) {
     const line = d3.line();
     const pathOf = (d) => line(AXES.map((a) => [x(a.key), y[a.key](d[a.key])]));
 
-    // Visible lines (drawn first, underneath the axes) ...
+    // Visible lines (drawn first, underneath the median backbones and axes) ...
     const lines = g
       .append("g")
       .attr("class", "pcp-lines")
@@ -48,6 +48,21 @@ export function initPCP(container) {
       .attr("class", "pcp-line")
       .attr("d", pathOf)
       .attr("stroke", (d) => GEN_COLORS[d.generation]);
+
+    // Bold generation median "backbone" polylines (halo + colored stroke) for visual storytelling
+    const gens = Object.keys(GEN_COLORS);
+    const backboneG = g.append("g").attr("class", "pcp-backbones");
+    const backboneHalos = backboneG
+      .selectAll("path.pcp-backbone-halo")
+      .data(gens)
+      .join("path")
+      .attr("class", "pcp-backbone-halo");
+    const backboneLines = backboneG
+      .selectAll("path.pcp-backbone")
+      .data(gens)
+      .join("path")
+      .attr("class", "pcp-backbone")
+      .attr("stroke", (gen) => GEN_COLORS[gen]);
 
     // ... and invisible, thicker copies that catch the mouse between axes
     const hits = g
@@ -108,6 +123,21 @@ export function initPCP(container) {
       lines.classed("out", (d) => !on(d));
       hits.classed("out", (d) => !on(d));
       lines.filter(on).raise(); // selected lines above the grey context lines
+
+      // Update median backbone per generation from currently selected kits
+      const activeByGen = d3.group(state.data.filter(on), (d) => d.generation);
+      const medianPath = (gen) => {
+        const rows = activeByGen.get(gen);
+        if (!rows || !rows.length) return null;
+        return line(AXES.map((a) => [x(a.key), y[a.key](d3.median(rows, (d) => d[a.key]))]));
+      };
+      backboneHalos
+        .attr("display", (gen) => (activeByGen.get(gen)?.length ? null : "none"))
+        .attr("d", medianPath);
+      backboneLines
+        .attr("display", (gen) => (activeByGen.get(gen)?.length ? null : "none"))
+        .attr("d", medianPath);
+
       brushG.each(function (a) {
         // a "Limpar filtros" reset has to remove the brush rectangles too
         if (!state.pcp[a.key] && d3.brushSelection(this)) d3.select(this).call(brushes[a.key].move, null);
