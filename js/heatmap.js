@@ -3,7 +3,7 @@
  * Rows = generation + market segment, columns = half-year period,
  * cell color and label = median price_per_gb. Click a cell to filter the other views.
  */
-import { state, GEN_COLORS, SEGMENTS, HALVES, halfOf, genShort } from "./state.js";
+import { state, GEN_COLORS, SEGMENTS, HALVES, halfOf, halfOfQuarter, genShort } from "./state.js";
 import { mountSvg, showTooltip, hideTooltip } from "./common.js";
 
 const MARGIN = { top: 36, right: 16, bottom: 40, left: 118 };
@@ -20,10 +20,12 @@ const ROWS = Object.keys(GEN_COLORS).flatMap((generation) =>
 const cellKey = (generation, segment, half) => `${generation}|${segment}|${half}`;
 const keyOfRecord = (d) => cellKey(d.generation, d.market_segment, halfOf(d));
 
-/** Median price per GB and record count for each cell, using the records that pass the other views' filters. */
+/** Median price per GB and record count for each cell, keeping context across periods/generations. */
 function cellStats() {
   return d3.rollup(
-    state.data.filter((d) => state.matches(d, true)),
+    state.data.filter((d) =>
+      state.matches(d, { ignoreCell: true, ignoreHalf: true, ignoreGen: true, ignoreSegment: true })
+    ),
     (v) => ({ n: v.length, median: d3.median(v, (d) => d.price_per_gb) }),
     keyOfRecord
   );
@@ -127,10 +129,23 @@ export function initHeatmap(container) {
       stats = cellStats();
       const a = state.cell;
       const activeKey = a ? cellKey(a.generation, a.market_segment, a.half) : null;
+      const filterHalf = state.half || (state.quarter ? halfOfQuarter(state.quarter) : null);
+      const filterGen = state.gen;
+      const filterSeg = state.segment;
+      const hasSlice = activeKey !== null || filterHalf !== null || filterGen !== null || filterSeg !== null;
+
+      const cellMatchesSlice = (c) => {
+        if (activeKey) return c.key === activeKey;
+        if (filterHalf && c.half !== filterHalf) return false;
+        if (filterGen && c.generation !== filterGen) return false;
+        if (filterSeg && c.market_segment !== filterSeg) return false;
+        return true;
+      };
+
       cell
         .classed("empty", (c) => !stats.get(c.key))
-        .classed("active", (c) => c.key === activeKey)
-        .classed("dimmed", (c) => activeKey !== null && c.key !== activeKey);
+        .classed("active", (c) => c.key === activeKey || (hasSlice && !activeKey && cellMatchesSlice(c)))
+        .classed("dimmed", (c) => hasSlice && !cellMatchesSlice(c));
       cell.select("rect").attr("fill", (c) => {
         const s = stats.get(c.key);
         return s ? color(s.median) : null;

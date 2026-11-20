@@ -8,7 +8,7 @@
 import { state, GEN_COLORS } from "./state.js";
 import { mountSvg, showTooltip, hideTooltip, kitTooltip } from "./common.js";
 
-const MARGIN = { top: 14, right: 16, bottom: 40, left: 54 };
+const MARGIN = { top: 24, right: 16, bottom: 38, left: 54 };
 const CRITICAL_WEEKS = 8;
 
 export function initScatter(container) {
@@ -22,16 +22,16 @@ export function initScatter(container) {
 
     const x = d3.scaleLinear().domain([0, 16]).range([0, w]);
     const [pMin, pMax] = d3.extent(state.data, (d) => d.price_per_gb);
-    const y = d3.scaleLog().domain([pMin * 0.8, pMax * 1.2]).range([h, 0]); // small margin so dots are not cut
+    const y = d3.scaleLog().domain([pMin * 0.8, pMax * 1.25]).range([h, 0]); // small margin so dots are not cut
     const r = d3.scaleSqrt().domain([8, 512]).range([4, 11]);
 
     // Scarcity zone (< 8 weeks) and dashed threshold line
     g.append("rect").attr("class", "critical-zone").attr("width", x(CRITICAL_WEEKS)).attr("height", h);
     g.append("line").attr("class", "critical-line")
-      .attr("x1", x(CRITICAL_WEEKS)).attr("x2", x(CRITICAL_WEEKS)).attr("y1", 0).attr("y2", h);
+      .attr("x1", x(CRITICAL_WEEKS)).attr("x2", x(CRITICAL_WEEKS)).attr("y1", -4).attr("y2", h);
     g.append("text").attr("class", "critical-label")
-      .attr("x", x(CRITICAL_WEEKS) - 6).attr("y", 12).attr("text-anchor", "end")
-      .text("Zona Crítica de Escassez < 8 semanas");
+      .attr("x", x(CRITICAL_WEEKS) / 2).attr("y", -7).attr("text-anchor", "middle")
+      .text("⚠ Zona Crítica de Escassez (< 8 semanas)");
 
     // Axes
     g.append("g").attr("class", "axis").attr("transform", `translate(0,${h})`).call(d3.axisBottom(x).ticks(8));
@@ -110,8 +110,8 @@ export function initScatter(container) {
 
     g.append("text")
       .attr("class", "sc-flow-hint")
-      .attr("x", w - 6)
-      .attr("y", 12)
+      .attr("x", w - 4)
+      .attr("y", -7)
       .attr("text-anchor", "end")
       .text("⟵ Fluxo 2024 → 2026 (queda de estoque)");
 
