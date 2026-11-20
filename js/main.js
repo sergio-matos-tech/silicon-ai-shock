@@ -1,11 +1,13 @@
-import { state, GEN_COLORS, genShort } from "./state.js";
+import { state, GEN_COLORS, genShort, segShort, quarterLabel } from "./state.js";
+import { initKPIs } from "./kpi.js";
+import { initStory } from "./story.js";
+import { initClock } from "./clock.js";
+import { initWafer } from "./wafer.js";
+import { initGlyphs } from "./glyphs.js";
 import { initPCP } from "./pcp.js";
 import { initScatter } from "./scatter.js";
 import { initHeatmap } from "./heatmap.js";
 import { initDumbbell } from "./dumbbell.js";
-import { initTimeline } from "./timeline.js";
-import { initIndexed } from "./indexed.js";
-import { initValue } from "./value.js";
 import { initInspector } from "./inspector.js";
 
 // Interactive generation legend (click to filter by generation)
@@ -15,10 +17,10 @@ const legendItems = d3
   .data(Object.entries(GEN_COLORS))
   .join("span")
   .attr("class", "legend-item")
-  .html(([name, color]) => `<i style="background:${color}"></i>${name}`)
+  .html(([name, color]) => `<i style="background:${color}"></i>${genShort(name)}`)
   .on("click", (_, [name]) => state.toggleGen(name));
 
-// Layout switcher (1: Base 3 painéis, 2: Coluna direita, 3: Narrativa no topo)
+// Layout switcher (1: Narrativa no topo, 2: Explorador no topo, 3: Coluna direita)
 const dash = d3.select("#dashboard");
 const setLayout = (mode) => {
   dash
@@ -31,21 +33,24 @@ const setLayout = (mode) => {
 d3.selectAll(".layout-switch button").on("click", function () {
   setLayout(this.dataset.layout);
 });
+if (location.search.includes("bottom3")) setLayout("bottom3");
 if (location.search.includes("rightsplit")) setLayout("rightsplit");
 if (location.search.includes("storyfirst")) setLayout("storyfirst");
 
-d3.json("data/processed_data.json")
-  .then((data) => {
-    state.init(data);
+Promise.all([d3.json("data/processed_data.json"), d3.json("data/aggregates.json")])
+  .then(([data, agg]) => {
+    state.init(data, agg);
 
+    initKPIs(document.querySelector("#kpi-strip"));
+    initStory(document.querySelector("#story-stepper"), document.querySelector("#story-banner"));
+    initClock(document.querySelector("#view-timeline"));
+    initWafer(document.querySelector("#view-indexed"));
+    initGlyphs(document.querySelector("#view-value"));
     initPCP(document.querySelector("#view-pcp"));
     initInspector(document.querySelector("#details"));
     initScatter(document.querySelector("#view-scatter"));
     initHeatmap(document.querySelector("#view-heatmap"));
     initDumbbell(document.querySelector("#view-dumbbell"));
-    initTimeline(document.querySelector("#view-timeline"));
-    initIndexed(document.querySelector("#view-indexed"));
-    initValue(document.querySelector("#view-value"));
 
     const counter = d3.select("#count");
     const chipsBox = d3.select("#active-filters");
@@ -53,16 +58,36 @@ d3.json("data/processed_data.json")
 
     const renderChips = () => {
       const chips = [];
-      if (state.gen) chips.push({ label: genShort(state.gen), clear: () => state.toggleGen(state.gen) });
-      if (state.half) chips.push({ label: state.half, clear: () => state.toggleHalf(state.half) });
+      if (state.gen) {
+        chips.push({ label: genShort(state.gen), clear: () => state.toggleGen(state.gen) });
+      }
+      if (state.segment) {
+        chips.push({
+          label: segShort(state.segment),
+          clear: () => {
+            state.segment = null;
+            state.refresh();
+          },
+        });
+      }
+      if (state.quarter) {
+        chips.push({ label: quarterLabel(state.quarter), clear: () => state.setQuarter(null) });
+      }
+      if (state.half) {
+        chips.push({ label: state.half, clear: () => state.toggleHalf(state.half) });
+      }
       if (state.cell) {
         chips.push({
           label: `${genShort(state.cell.generation)} · ${state.cell.half}`,
           clear: () => state.toggleCell(state.cell),
         });
       }
-      if (state.usage) chips.push({ label: state.usage, clear: () => state.toggleUsage(state.usage) });
-      if (state.box) chips.push({ label: "Janela B", clear: () => state.setBox(null) });
+      if (state.usage) {
+        chips.push({ label: state.usage, clear: () => state.toggleUsage(state.usage) });
+      }
+      if (state.box) {
+        chips.push({ label: "Janela B", clear: () => state.setBox(null) });
+      }
       const pcpKeys = Object.keys(state.pcp);
       if (pcpKeys.length) {
         chips.push({
@@ -81,10 +106,12 @@ d3.json("data/processed_data.json")
     };
 
     const updateHeader = () => {
-      counter.text(`${state.selected.size} / ${state.data.length} kits selecionados`);
+      counter.text(`${state.selected.size} / ${state.data.length} kits`);
       resetBtn.property("disabled", !state.hasFilters() && state.pinnedId === null);
       const activeGen = state.gen || state.cell?.generation || null;
-      legendItems.classed("dimmed", ([name]) => activeGen !== null && name !== activeGen);
+      legendItems
+        .classed("active", ([name]) => activeGen === name)
+        .classed("dimmed", ([name]) => activeGen !== null && name !== activeGen);
       renderChips();
     };
     state.on("filter", updateHeader);
@@ -93,5 +120,5 @@ d3.json("data/processed_data.json")
   })
   .catch((err) => {
     console.error(err);
-    d3.select("#count").text("Erro ao carregar os dados. Abra via servidor HTTP (python -m http.server).");
+    d3.select("#count").text("Erro ao carregar dados. Sirva via HTTP (python -m http.server).");
   });

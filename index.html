@@ -3,32 +3,71 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SiliconAIShock — Crise de Memória DRAM</title>
+  <title>SiliconAIShock — Crise de Memória DRAM (2024–2026)</title>
   <link rel="stylesheet" href="css/style.css" />
   <script src="lib/d3.v7.min.js"></script>
 </head>
 <body>
   <header class="topbar">
-    <h1>SiliconAIShock <small>Crise de Memória DRAM (2024–2026)</small></h1>
-    <div id="legend" class="legend" title="Clique em uma geração para filtrar"></div>
-    <div class="layout-switch" title="Alternar entre as opções de layout">
-      <span>Layout:</span>
-      <button type="button" data-layout="bottom3" class="active">1 · Base 3 painéis</button>
-      <button type="button" data-layout="rightsplit">2 · Coluna direita</button>
-      <button type="button" data-layout="storyfirst">3 · Narrativa no topo</button>
+    <div class="brand-block">
+      <span class="brand-dot"></span>
+      <h1>SiliconAIShock <small>Crise Global de Memória DRAM (2024–2026)</small></h1>
     </div>
+
+    <div id="legend" class="legend" title="Clique em uma geração para filtrar"></div>
+
+    <nav id="story-stepper" class="story-stepper" aria-label="Atos da narrativa"></nav>
+
+    <div class="layout-switch" title="Alternar organização dos painéis">
+      <span>Layout:</span>
+      <button type="button" data-layout="storyfirst" class="active">1 · Narrativa</button>
+      <button type="button" data-layout="bottom3">2 · Explorador</button>
+      <button type="button" data-layout="rightsplit">3 · Coluna</button>
+    </div>
+
     <div class="topbar-right">
       <div id="active-filters" class="filter-chips"></div>
-      <span id="count"></span>
+      <span id="count" class="kit-counter"></span>
       <button id="btn-reset" type="button" disabled>Limpar filtros</button>
     </div>
   </header>
 
-  <main id="dashboard" class="dashboard">
+  <section id="story-banner" class="story-banner" aria-live="polite"></section>
+
+  <section id="kpi-strip" class="kpi-strip" aria-label="Indicadores vitais do mercado"></section>
+
+  <main id="dashboard" class="dashboard layout-storyfirst">
+    <section class="panel panel-timeline">
+      <h2>
+        <span class="step-badge step-story">E</span>
+        Relógio da Crise &amp; Reservatório <small>arraste o ponteiro · clique em ▶ Animar</small>
+        <span class="panel-badge badge-story">1 · Causa &amp; Dreno</span>
+      </h2>
+      <div id="view-timeline" class="view"></div>
+    </section>
+
+    <section class="panel panel-indexed">
+      <h2>
+        <span class="step-badge step-story">F</span>
+        Mapa de Wafers de Silício <small>1 die = 1 kit · clique no wafer ou die</small>
+        <span class="panel-badge badge-alert">2 · Contágio 100%</span>
+      </h2>
+      <div id="view-indexed" class="view"></div>
+    </section>
+
+    <section class="panel panel-value">
+      <h2>
+        <span class="step-badge step-story">G</span>
+        Glifos Estelares de Saúde <small>2024 tracejado vs. 2026 preenchido · clique</small>
+        <span class="panel-badge badge-alert">3 · Deformação</span>
+      </h2>
+      <div id="view-value" class="view"></div>
+    </section>
+
     <section class="panel panel-pcp">
       <h2>
         <span class="step-badge">A</span>
-        Coordenadas Paralelas <small>arraste nos eixos · linhas fortes = mediana da geração</small>
+        Coordenadas Paralelas <small>arraste nos eixos para filtrar · linhas fortes = mediana da geração</small>
         <span class="panel-badge">Perfil Técnico &amp; Oferta</span>
       </h2>
       <div id="view-pcp" class="view"></div>
@@ -37,7 +76,7 @@
     <aside class="panel panel-details">
       <h2>
         <span class="step-badge">★</span>
-        Detalhes &amp; Resumo <small>hover ou clique (📌)</small>
+        Inspetor &amp; Recibo <small>hover ou clique (📌)</small>
       </h2>
       <div id="details" class="details"></div>
     </aside>
@@ -45,7 +84,7 @@
     <section class="panel panel-scatter">
       <h2>
         <span class="step-badge">B</span>
-        Estoque × Preço <small>arraste · setas = fluxo 24→26</small>
+        Estoque × Preço <small>brush 2D · raio = capacidade · setas = fluxo 24→26</small>
         <span class="panel-badge badge-alert">Crítico &lt; 8 sem.</span>
       </h2>
       <div id="view-scatter" class="view"></div>
@@ -54,7 +93,7 @@
     <section class="panel panel-heatmap">
       <h2>
         <span class="step-badge">C</span>
-        Impacto por Período <small>US$/GB · clique para filtrar</small>
+        Matriz de Impacto <small>mediana US$/GB por semestre · clique na célula</small>
         <span class="panel-badge badge-alert">Ruptura 2025-H2</span>
       </h2>
       <div id="view-heatmap" class="view"></div>
@@ -63,37 +102,10 @@
     <section class="panel panel-dumbbell">
       <h2>
         <span class="step-badge">D</span>
-        Salto 2024 → 2026 <small>por uso · clique para filtrar</small>
+        Salto 2024 → 2026 por Uso <small>clique em uma carga de trabalho para filtrar</small>
         <span class="panel-badge badge-alert">Alta 4,6×–5,2×</span>
       </h2>
       <div id="view-dumbbell" class="view"></div>
-    </section>
-
-    <section class="panel panel-timeline">
-      <h2>
-        <span class="step-badge step-story">E</span>
-        Linha do Tempo Causal <small>HBM → Fabs → Estoque</small>
-        <span class="panel-badge badge-story">1 · A Causa</span>
-      </h2>
-      <div id="view-timeline" class="view"></div>
-    </section>
-
-    <section class="panel panel-indexed">
-      <h2>
-        <span class="step-badge step-story">F</span>
-        Inflação por Geração <small>base 2024 = 1,0× · clique</small>
-        <span class="panel-badge badge-alert">2 · DDR4 8,0×</span>
-      </h2>
-      <div id="view-indexed" class="view"></div>
-    </section>
-
-    <section class="panel panel-value">
-      <h2>
-        <span class="step-badge step-story">G</span>
-        Erosão de Valor <small>banda/US$ 24→26 · clique</small>
-        <span class="panel-badge badge-alert">3 · Queda 66%–86%</span>
-      </h2>
-      <div id="view-value" class="view"></div>
     </section>
   </main>
 
