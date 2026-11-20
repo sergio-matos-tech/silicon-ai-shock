@@ -6,12 +6,13 @@
 import { state, GEN_COLORS, SEGMENTS, HALVES, halfOf, genShort } from "./state.js";
 import { mountSvg, showTooltip, hideTooltip } from "./common.js";
 
-const MARGIN = { top: 34, right: 16, bottom: 40, left: 130 };
+const MARGIN = { top: 36, right: 16, bottom: 40, left: 118 };
 
 const ROWS = Object.keys(GEN_COLORS).flatMap((generation) =>
   SEGMENTS.map((market_segment) => ({
     generation,
     market_segment,
+    shortSeg: market_segment === "Enterprise/AI" ? "Enterprise" : "Consumer",
     label: `${genShort(generation)} ${market_segment}`,
   }))
 );
@@ -45,8 +46,24 @@ export function initHeatmap(container) {
     const color = d3.scaleSequentialLog(d3.interpolateYlOrRd).domain(d3.extent(medians));
     const textColor = (bg) => (d3.lab(bg).l < 60 ? "#fff" : "#111827");
 
-    // Axes
-    g.append("g").attr("class", "axis heat-axis").call(d3.axisLeft(y).tickSize(0)).select(".domain").remove();
+    // Axes: hierarchical generation brackets on left + segment sub-labels
+    const rowByLabel = new Map(ROWS.map((r) => [r.label, r]));
+    g.append("g")
+      .attr("class", "axis heat-axis")
+      .call(d3.axisLeft(y).tickSize(0).tickFormat((lbl) => rowByLabel.get(lbl)?.shortSeg || lbl))
+      .select(".domain")
+      .remove();
+
+    Object.entries(GEN_COLORS).forEach(([gen, genColor]) => {
+      const genRows = ROWS.filter((r) => r.generation === gen);
+      const yTop = y(genRows[0].label);
+      const yBot = y(genRows[genRows.length - 1].label) + y.bandwidth();
+      const grp = g.append("g").attr("class", "heat-gen-group").on("click", () => state.toggleGen(gen));
+      grp.append("rect").attr("x", -68).attr("y", yTop + 1).attr("width", 4).attr("height", yBot - yTop - 2).attr("rx", 2).attr("fill", genColor);
+      grp.append("text").attr("class", "heat-gen-label").attr("x", -74).attr("y", (yTop + yBot) / 2)
+        .attr("text-anchor", "end").attr("dominant-baseline", "middle").attr("fill", genColor).text(genShort(gen));
+    });
+
     g.append("g").attr("class", "axis heat-axis").call(d3.axisTop(x).tickSize(0)).select(".domain").remove();
     g.append("text").attr("class", "axis-title").attr("x", w / 2).attr("y", h + 18)
       .attr("text-anchor", "middle").text("Período (semestre)");
@@ -78,6 +95,17 @@ export function initHeatmap(container) {
     const text = cell.append("text").attr("class", "cell-value")
       .attr("x", x.bandwidth() / 2).attr("y", y.bandwidth() / 2)
       .attr("text-anchor", "middle").attr("dominant-baseline", "middle");
+
+    // Vertical crisis inflection divider before 2025-H2 (< 8 weeks inventory threshold)
+    const splitX = (x("2025-H1") + x.bandwidth() + x("2025-H2")) / 2;
+    g.append("line")
+      .attr("class", "inflection-line")
+      .attr("x1", splitX).attr("x2", splitX)
+      .attr("y1", -18).attr("y2", h + 2);
+    g.append("text")
+      .attr("class", "inflection-label")
+      .attr("x", splitX + 4).attr("y", -22)
+      .text("▸ Escassez (<8 sem.)");
 
     let stats = new Map();
     cell
