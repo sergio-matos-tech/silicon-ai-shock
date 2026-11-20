@@ -76,6 +76,13 @@ export function initDumbbell(container) {
       .attr("text-anchor", "middle")
       .text("Preço Mediano (US$/GB)");
 
+    // Blue (2024) -> Red (2026) gradient (userSpaceOnUse so horizontal y1===y2 lines render)
+    const grad = svg.append("defs").append("linearGradient").attr("id", "db-grad")
+      .attr("gradientUnits", "userSpaceOnUse")
+      .attr("x1", 0).attr("x2", w).attr("y1", 0).attr("y2", 0);
+    grad.append("stop").attr("offset", "0%").attr("stop-color", "#3b82f6");
+    grad.append("stop").attr("offset", "100%").attr("stop-color", "#dc2626");
+
     // Top inline legend (2024 -> 2026)
     const leg = g.append("g").attr("transform", "translate(0,-12)");
     leg.append("circle").attr("cx", 5).attr("cy", -3).attr("r", 4.5).attr("class", "db-dot-24");
