@@ -80,9 +80,66 @@ export function initScatter(container) {
       })
       .on("click", (_, d) => state.togglePin(d.kit_id));
 
+    // Temporal trajectory overlay (2024 -> 2026 median vector per generation)
+    const defs = svg.append("defs");
+    Object.entries(GEN_COLORS).forEach(([gen, color], i) => {
+      defs
+        .append("marker")
+        .attr("id", `sc-arrow-${i}`)
+        .attr("viewBox", "0 -4 8 8")
+        .attr("refX", 6)
+        .attr("refY", 0)
+        .attr("markerWidth", 5.5)
+        .attr("markerHeight", 5.5)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-3.5L7,0L0,3.5Z")
+        .attr("fill", color);
+    });
+
+    const gens = Object.keys(GEN_COLORS);
+    const trajG = g.append("g").attr("class", "sc-trajectories");
+    const trajHalos = trajG.selectAll("path.sc-traj-halo").data(gens).join("path").attr("class", "sc-traj-halo");
+    const trajPaths = trajG
+      .selectAll("path.sc-traj")
+      .data(gens)
+      .join("path")
+      .attr("class", "sc-traj")
+      .attr("stroke", (gen) => GEN_COLORS[gen])
+      .attr("marker-end", (_, i) => `url(#sc-arrow-${i})`);
+
+    g.append("text")
+      .attr("class", "sc-flow-hint")
+      .attr("x", w - 6)
+      .attr("y", 12)
+      .attr("text-anchor", "end")
+      .text("⟵ Fluxo 2024 → 2026 (queda de estoque)");
+
+    const trajPathOf = (gen, rows) => {
+      const r24 = rows.filter((d) => d.generation === gen && d.timestamp.startsWith("2024"));
+      const r26 = rows.filter((d) => d.generation === gen && d.timestamp.startsWith("2026"));
+      if (!r24.length || !r26.length) return null;
+      const x1 = x(d3.median(r24, (d) => d.global_inventory_weeks));
+      const y1 = y(d3.median(r24, (d) => d.price_per_gb));
+      const x2 = x(d3.median(r26, (d) => d.global_inventory_weeks));
+      const y2 = y(d3.median(r26, (d) => d.price_per_gb));
+      const mx = (x1 + x2) / 2;
+      const my = (y1 + y2) / 2 - 12;
+      return `M${x1},${y1} Q${mx},${my} ${x2},${y2}`;
+    };
+
     update = () => {
       dots.classed("out", (d) => !state.selected.has(d.kit_id));
       dots.filter((d) => state.selected.has(d.kit_id)).raise();
+
+      const trajSubset = state.data.filter((d) => state.matches(d, { ignoreHalf: true }));
+      trajHalos
+        .attr("display", (gen) => (trajPathOf(gen, trajSubset) ? null : "none"))
+        .attr("d", (gen) => trajPathOf(gen, trajSubset));
+      trajPaths
+        .attr("display", (gen) => (trajPathOf(gen, trajSubset) ? null : "none"))
+        .attr("d", (gen) => trajPathOf(gen, trajSubset));
+
       // "Limpar filtros" has to remove the brush rectangle too
       if (!state.box && d3.brushSelection(brushG.node())) brushG.call(brush.move, null);
       updateHover();
