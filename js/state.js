@@ -1,11 +1,13 @@
 /**
- * Shared state for brushing & linking between the four views.
+ * Shared state for brushing & linking between all coordinated views.
  *
- * Four independent filters, combined with AND:
+ * Independent filters, combined with AND:
  *   pcp   - value range per axis, set by the brushes on the parallel coordinates
  *   box   - 2D rectangle (weeks x price/GB), set by the scatter plot brush
  *   cell  - one heatmap cell (generation + segment + half-year)
  *   usage - one recommended_usage row, set by clicking the dumbbell chart
+ *   half  - one half-year period ("2024-H1".."2026-H2"), set by the timeline
+ *   gen   - one memory generation ("DDR4", "DDR5", "DDR6 (Preview)"), set by Views F/G
  * `selected` holds the kit_ids that pass all filters; every view dims the rest.
  * `hoverId` / `pinnedId` choose which kit the details card shows.
  */
@@ -41,6 +43,8 @@ export const state = {
   box: null, // { x: [min, max], y: [min, max] }
   cell: null, // { generation, market_segment, half }
   usage: null, // string (recommended_usage)
+  half: null, // string ("2024-H1".."2026-H2")
+  gen: null, // string ("DDR4" | "DDR5" | "DDR6 (Preview)")
   hoverId: null,
   pinnedId: null,
 
@@ -56,10 +60,10 @@ export const state = {
 
   /**
    * Does record d pass the filters?
-   * `opts` may be `true` (shorthand for ignoreCell) or `{ ignoreCell, ignoreHalf, ignoreUsage }`.
+   * `opts` may be `true` (shorthand for ignoreCell) or `{ ignoreCell, ignoreHalf, ignoreUsage, ignoreGen }`.
    */
   matches(d, opts = {}) {
-    const { ignoreCell = false, ignoreHalf = false, ignoreUsage = false } =
+    const { ignoreCell = false, ignoreHalf = false, ignoreUsage = false, ignoreGen = false } =
       opts === true ? { ignoreCell: true } : opts;
 
     for (const [key, [lo, hi]] of Object.entries(this.pcp)) {
@@ -76,6 +80,8 @@ export const state = {
       if (!ignoreHalf && halfOf(d) !== c.half) return false;
     }
     if (this.usage && !ignoreUsage && d.recommended_usage !== this.usage) return false;
+    if (this.half && !ignoreHalf && halfOf(d) !== this.half) return false;
+    if (this.gen && !ignoreGen && d.generation !== this.gen) return false;
     return true;
   },
 
@@ -108,12 +114,26 @@ export const state = {
     this.refresh();
   },
 
+  /** Clicking the active half-year column again clears it. */
+  toggleHalf(half) {
+    this.half = this.half === half ? null : half;
+    this.refresh();
+  },
+
+  /** Clicking the active generation again clears it. */
+  toggleGen(gen) {
+    this.gen = this.gen === gen ? null : gen;
+    this.refresh();
+  },
+
   /** "Limpar filtros": clears every filter and the pinned kit. */
   reset() {
     this.pcp = {};
     this.box = null;
     this.cell = null;
     this.usage = null;
+    this.half = null;
+    this.gen = null;
     this.pinnedId = null;
     this.refresh();
     listeners.hover.forEach((fn) => fn());
@@ -124,7 +144,9 @@ export const state = {
       Object.keys(this.pcp).length > 0 ||
       this.box !== null ||
       this.cell !== null ||
-      this.usage !== null
+      this.usage !== null ||
+      this.half !== null ||
+      this.gen !== null
     );
   },
 

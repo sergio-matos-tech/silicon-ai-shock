@@ -42,3 +42,26 @@ export function kitTooltip(d) {
     <div class="tip-row"><span>Estoque global</span><span>${d.global_inventory_weeks.toFixed(1)} sem.</span></div>
     <div class="tip-row"><span>Preço por GB</span><span>US$ ${d.price_per_gb.toFixed(2)}</span></div>`;
 }
+
+/**
+ * Separates vertically crowded label positions ({ y }) by at least `minGap` pixels
+ * while staying within [minY, maxY]. Returns a Map from item to adjusted y.
+ */
+export function deoverlapY(items, minGap = 14, minY = 0, maxY = Infinity) {
+  const sorted = [...items].sort((a, b) => a.y - b.y);
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i].y - sorted[i - 1].y < minGap) {
+      sorted[i].y = sorted[i - 1].y + minGap;
+    }
+  }
+  if (sorted.length && sorted[sorted.length - 1].y > maxY) {
+    sorted[sorted.length - 1].y = maxY;
+    for (let i = sorted.length - 2; i >= 0; i--) {
+      if (sorted[i + 1].y - sorted[i].y < minGap) {
+        sorted[i].y = sorted[i + 1].y - minGap;
+      }
+    }
+  }
+  if (sorted.length && sorted[0].y < minY) sorted[0].y = minY;
+  return new Map(sorted.map((d) => [d.key, d.y]));
+}
