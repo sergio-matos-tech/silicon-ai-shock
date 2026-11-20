@@ -10,7 +10,11 @@ at most 300 representative records:
          so small groups such as DDR6 stay readable; the rest is proportional
        - inside a group, each capacity_gb stratum gets a share, and its records
          are picked evenly spaced along the timeline
-  3. keep only the columns the three views use (no derived columns)
+  3. keep only the columns the views use (no derived columns)
+
+It also writes data/aggregates.json: quarterly market medians and a few
+narrative facts computed on the FULL cleaned dataset (KPI strip, crisis clock,
+story mode).
 
 Run from the project root:
   .venv\\Scripts\\python.exe scripts\\preprocess.py
@@ -30,13 +34,66 @@ MAX_RECORDS = 300
 MIN_PER_GROUP = 25          # floor for every (generation, market_segment) group
 GROUP = ["generation", "market_segment"]
 
+AGG_FILE = ROOT / "data" / "aggregates.json"
+
 COLUMNS = [
     "kit_id", "brand", "model_name", "timestamp", "region", "generation",
     "market_segment", "recommended_usage", "die_manufacturer",
     "capacity_gb", "speed_mts", "true_latency_ns",
     "price_per_gb", "price_usd", "bandwidth_per_dollar", "speed_premium_ratio",
     "global_inventory_weeks", "fab_utilization_rate", "gpu_hbm_trend_gb",
+    "price_status",
 ]
+
+INFLATED = "Shortage-Inflated"
+CRITICAL_WEEKS = 8
+
+
+def build_aggregates(df):
+    """Market-wide quarterly medians and narrative facts, computed on the FULL
+    cleaned dataset (not the 300-kit sample), for the KPI strip, the crisis
+    clock and the story mode."""
+    df = df.assign(quarter=df["timestamp"].dt.year.astype(str) + "Q" + df["timestamp"].dt.quarter.astype(str))
+    year = df["timestamp"].dt.year
+
+    quarters = (
+        df.groupby("quarter")
+        .agg(
+            n=("kit_id", "size"),
+            price_per_gb=("price_per_gb", "median"),
+            global_inventory_weeks=("global_inventory_weeks", "median"),
+            fab_utilization_rate=("fab_utilization_rate", "median"),
+            gpu_hbm_trend_gb=("gpu_hbm_trend_gb", "median"),
+            bandwidth_per_dollar=("bandwidth_per_dollar", "median"),
+            speed_premium_ratio=("speed_premium_ratio", "median"),
+            inflated_share=("price_status", lambda s: (s == INFLATED).mean()),
+        )
+        .reset_index()
+        .sort_values("quarter")
+    )
+
+    # Reference kit: DDR5 32 GB consumer kit, median total price per year
+    ref = df[(df["generation"] == "DDR5") & (df["capacity_gb"] == 32) & (df["market_segment"] == "Consumer")]
+    ref_price = ref.groupby(ref["timestamp"].dt.year)["price_usd"].median()
+
+    # Regional spread: (max - min) / median of the regional medians, worst year
+    reg = df.groupby([year, "region"])["price_per_gb"].median().unstack()
+    region_spread = ((reg.max(axis=1) - reg.min(axis=1)) / reg.median(axis=1)).max()
+
+    gen_share = df.groupby(year)["generation"].value_counts(normalize=True).unstack()
+
+    facts = {
+        "rows": int(len(df)),
+        "regions": int(df["region"].nunique()),
+        "brands": int(df["brand"].nunique()),
+        "die_makers": int(df["die_manufacturer"].nunique()),
+        "ref_kit": {"label": "DDR5 32 GB Consumer", "y2024": float(ref_price.get(2024)), "y2026": float(ref_price.get(2026))},
+        "price_above_critical": float(df.loc[df["global_inventory_weeks"] >= CRITICAL_WEEKS + 2, "price_per_gb"].median()),
+        "price_below_critical": float(df.loc[df["global_inventory_weeks"] < CRITICAL_WEEKS, "price_per_gb"].median()),
+        "region_spread": float(region_spread),
+        "ddr5_share": {"y2024": float(gen_share.loc[2024, "DDR5"]), "y2026": float(gen_share.loc[2026, "DDR5"])},
+    }
+    return {"quarters": quarters.round(4).to_dict(orient="records"), "facts": facts}
 
 
 def allocate(sizes, total, floor):
@@ -77,6 +134,11 @@ def main():
     # The study window is 2024-2026; the CSV has 5 rows on 2027-01-01 that would need a lone 2027-H1 column
     df = df[df["timestamp"] < "2027-01-01"]
     print(f"After keeping 2024-2026: {len(df)} rows")
+
+    aggregates = build_aggregates(df)
+    with open(AGG_FILE, "w", encoding="utf-8") as f:
+        json.dump(aggregates, f, ensure_ascii=False, indent=1, allow_nan=False)
+    print(f"Wrote {AGG_FILE.name}: {len(aggregates['quarters'])} quarters + narrative facts")
 
     group_quota = allocate(df.groupby(GROUP).size(), MAX_RECORDS, MIN_PER_GROUP)
 

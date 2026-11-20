@@ -1,0 +1,154 @@
+{
+ "quarters": [
+  {
+   "quarter": "2024Q1",
+   "n": 832,
+   "price_per_gb": 12.325,
+   "global_inventory_weeks": 14.495,
+   "fab_utilization_rate": 0.5185,
+   "gpu_hbm_trend_gb": 50.26,
+   "bandwidth_per_dollar": 50.4246,
+   "speed_premium_ratio": 1.7963,
+   "inflated_share": 0.0
+  },
+  {
+   "quarter": "2024Q2",
+   "n": 808,
+   "price_per_gb": 12.79,
+   "global_inventory_weeks": 13.47,
+   "fab_utilization_rate": 0.5558,
+   "gpu_hbm_trend_gb": 71.02,
+   "bandwidth_per_dollar": 56.8114,
+   "speed_premium_ratio": 1.847,
+   "inflated_share": 0.0
+  },
+  {
+   "quarter": "2024Q3",
+   "n": 810,
+   "price_per_gb": 13.225,
+   "global_inventory_weeks": 12.51,
+   "fab_utilization_rate": 0.5924,
+   "gpu_hbm_trend_gb": 91.32,
+   "bandwidth_per_dollar": 50.0507,
+   "speed_premium_ratio": 1.9276,
+   "inflated_share": 0.0
+  },
+  {
+   "quarter": "2024Q4",
+   "n": 815,
+   "price_per_gb": 13.81,
+   "global_inventory_weeks": 11.48,
+   "fab_utilization_rate": 0.6306,
+   "gpu_hbm_trend_gb": 112.54,
+   "bandwidth_per_dollar": 49.3286,
+   "speed_premium_ratio": 2.0035,
+   "inflated_share": 0.0
+  },
+  {
+   "quarter": "2025Q1",
+   "n": 839,
+   "price_per_gb": 19.75,
+   "global_inventory_weeks": 10.5,
+   "fab_utilization_rate": 0.6687,
+   "gpu_hbm_trend_gb": 133.75,
+   "bandwidth_per_dollar": 28.7731,
+   "speed_premium_ratio": 2.9708,
+   "inflated_share": 0.6687
+  },
+  {
+   "quarter": "2025Q2",
+   "n": 836,
+   "price_per_gb": 26.715,
+   "global_inventory_weeks": 9.5,
+   "fab_utilization_rate": 0.7065,
+   "gpu_hbm_trend_gb": 154.74,
+   "bandwidth_per_dollar": 21.8626,
+   "speed_premium_ratio": 4.0542,
+   "inflated_share": 0.7955
+  },
+  {
+   "quarter": "2025Q3",
+   "n": 849,
+   "price_per_gb": 35.0,
+   "global_inventory_weeks": 8.46,
+   "fab_utilization_rate": 0.7435,
+   "gpu_hbm_trend_gb": 175.26,
+   "bandwidth_per_dollar": 20.6503,
+   "speed_premium_ratio": 5.1953,
+   "inflated_share": 1.0
+  },
+  {
+   "quarter": "2025Q4",
+   "n": 823,
+   "price_per_gb": 42.74,
+   "global_inventory_weeks": 7.48,
+   "fab_utilization_rate": 0.7812,
+   "gpu_hbm_trend_gb": 196.25,
+   "bandwidth_per_dollar": 13.6365,
+   "speed_premium_ratio": 6.3685,
+   "inflated_share": 1.0
+  },
+  {
+   "quarter": "2026Q1",
+   "n": 743,
+   "price_per_gb": 50.5,
+   "global_inventory_weeks": 6.51,
+   "fab_utilization_rate": 0.8182,
+   "gpu_hbm_trend_gb": 216.78,
+   "bandwidth_per_dollar": 12.6982,
+   "speed_premium_ratio": 7.3778,
+   "inflated_share": 1.0
+  },
+  {
+   "quarter": "2026Q2",
+   "n": 803,
+   "price_per_gb": 54.78,
+   "global_inventory_weeks": 5.54,
+   "fab_utilization_rate": 0.8552,
+   "gpu_hbm_trend_gb": 237.31,
+   "bandwidth_per_dollar": 13.1325,
+   "speed_premium_ratio": 8.2058,
+   "inflated_share": 1.0
+  },
+  {
+   "quarter": "2026Q3",
+   "n": 808,
+   "price_per_gb": 61.685,
+   "global_inventory_weeks": 4.52,
+   "fab_utilization_rate": 0.8942,
+   "gpu_hbm_trend_gb": 258.98,
+   "bandwidth_per_dollar": 11.3496,
+   "speed_premium_ratio": 9.0653,
+   "inflated_share": 1.0
+  },
+  {
+   "quarter": "2026Q4",
+   "n": 821,
+   "price_per_gb": 68.47,
+   "global_inventory_weeks": 3.49,
+   "fab_utilization_rate": 0.9303,
+   "gpu_hbm_trend_gb": 279.05,
+   "bandwidth_per_dollar": 10.3353,
+   "speed_premium_ratio": 9.9799,
+   "inflated_share": 1.0
+  }
+ ],
+ "facts": {
+  "rows": 9787,
+  "regions": 6,
+  "brands": 14,
+  "die_makers": 3,
+  "ref_kit": {
+   "label": "DDR5 32 GB Consumer",
+   "y2024": 242.065,
+   "y2026": 1112.03
+  },
+  "price_above_critical": 12.895,
+  "price_below_critical": 44.62,
+  "region_spread": 0.07601088646967334,
+  "ddr5_share": {
+   "y2024": 0.7044410413476263,
+   "y2026": 0.7074015748031496
+  }
+ }
+}
