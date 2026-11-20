@@ -1,4 +1,5 @@
-/** Helpers shared by the views: responsive SVG mounting and the tooltip. */
+/** Helpers shared by the views: responsive SVG mounting, tooltip and formatting. */
+import { INFLATED, genShort, GEN_COLORS } from "./state.js";
 
 /**
  * Fills `container` with an SVG and calls draw(svg, width, height) now and
@@ -34,34 +35,22 @@ export function hideTooltip() {
   tip().classed("hidden", true);
 }
 
+export const statusBadge = (status) =>
+  status === INFLATED
+    ? `<span class="status-badge inflated">Inflado pela escassez</span>`
+    : `<span class="status-badge normal">Preço normal</span>`;
+
 export function kitTooltip(d) {
   return `
-    <div class="tip-title">${d.model_name}</div>
+    <div class="tip-title"><i class="tip-swatch" style="background:${GEN_COLORS[d.generation]}"></i>${d.model_name}</div>
     <div class="tip-row"><span>Data</span><span>${d.timestamp}</span></div>
-    <div class="tip-row"><span>Capacidade</span><span>${d.capacity_gb} GB</span></div>
+    <div class="tip-row"><span>Geração · Capacidade</span><span>${genShort(d.generation)} · ${d.capacity_gb} GB</span></div>
     <div class="tip-row"><span>Estoque global</span><span>${d.global_inventory_weeks.toFixed(1)} sem.</span></div>
-    <div class="tip-row"><span>Preço por GB</span><span>US$ ${d.price_per_gb.toFixed(2)}</span></div>`;
+    <div class="tip-row"><span>Preço por GB</span><span>US$ ${d.price_per_gb.toFixed(2)}</span></div>
+    <div class="tip-foot">${statusBadge(d.price_status)}</div>`;
 }
 
-/**
- * Separates vertically crowded label positions ({ y }) by at least `minGap` pixels
- * while staying within [minY, maxY]. Returns a Map from item to adjusted y.
- */
-export function deoverlapY(items, minGap = 14, minY = 0, maxY = Infinity) {
-  const sorted = [...items].sort((a, b) => a.y - b.y);
-  for (let i = 1; i < sorted.length; i++) {
-    if (sorted[i].y - sorted[i - 1].y < minGap) {
-      sorted[i].y = sorted[i - 1].y + minGap;
-    }
-  }
-  if (sorted.length && sorted[sorted.length - 1].y > maxY) {
-    sorted[sorted.length - 1].y = maxY;
-    for (let i = sorted.length - 2; i >= 0; i--) {
-      if (sorted[i + 1].y - sorted[i].y < minGap) {
-        sorted[i].y = sorted[i + 1].y - minGap;
-      }
-    }
-  }
-  if (sorted.length && sorted[0].y < minY) sorted[0].y = minY;
-  return new Map(sorted.map((d) => [d.key, d.y]));
-}
+/** "US$ 1.234,56"-style helpers (pt-BR decimal comma, thin and readable). */
+export const ptBR = d3.formatLocale({ decimal: ",", thousands: ".", grouping: [3], currency: ["US$ ", ""] });
+export const fmtNum = (digits) => ptBR.format(`,.${digits}f`);
+export const fmtPct = (digits = 0) => ptBR.format(`.${digits}%`);
